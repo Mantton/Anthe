@@ -10,7 +10,6 @@ func New() *Environment {
 	return &Environment{store: make(map[string]Object)}
 }
 func (e *Environment) Get(key string) (Object, error) {
-	fmt.Println(e.store)
 	val, ok := e.store[key]
 
 	if !ok {
@@ -22,7 +21,5 @@ func (e *Environment) Get(key string) (Object, error) {
 func (e *Environment) Define(key string, val Object) {
 
 	e.store[key] = val
-
-	fmt.Println(e.store)
 
 }

@@ -38,6 +38,12 @@ type CallExpression struct {
 	Arguments []Expression
 }
 
+type IndexExpression struct {
+	Token token.Token
+	Left  Expression
+	Index Expression
+}
+
 // conform
 func (pe *PrefixExpression) expressionNode()      {}
 func (pe *PrefixExpression) TokenLiteral() string { return "Prefix " + pe.Token.Literal }
@@ -53,3 +59,6 @@ func (i *IfExpression) TokenLiteral() string { return "If " + i.Token.Literal }
 
 func (i *CallExpression) expressionNode()      {}
 func (i *CallExpression) TokenLiteral() string { return "Call " + i.Token.Literal }
+
+func (i *IndexExpression) expressionNode()      {}
+func (i *IndexExpression) TokenLiteral() string { return "Idx " + i.Token.Literal }

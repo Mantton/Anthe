@@ -15,6 +15,7 @@ const (
 	NULL         = "NULL"
 	VOID         = "VOID"
 	RETURN_VALUE = "RETURN_VALUE"
+	ARRAY        = "ARRAY"
 )
 
 type Integer struct {
@@ -32,6 +33,10 @@ type ReturnValue struct {
 	Value Object
 }
 
+type Array struct {
+	Elements []Object
+}
+
 func (b *Boolean) Type() ObjectType { return BOOLEAN }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 
@@ -46,3 +51,6 @@ func (n *Void) Inspect() string  { return "void" }
 
 func (n *ReturnValue) Type() ObjectType { return RETURN_VALUE }
 func (n *ReturnValue) Inspect() string  { return n.Value.Inspect() }
+
+func (n *Array) Type() ObjectType { return ARRAY }
+func (n *Array) Inspect() string  { return "ARRAYYYYYY" }

@@ -79,3 +79,54 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 
 	return identifiers, nil
 }
+
+func (p *Parser) parseArrayLiteral() (ast.Expression, error) {
+	array := &ast.ArrayLiteral{Token: p.curToken}
+
+	elems, err := p.parseExpressionList(token.RBRACKET)
+
+	if err != nil {
+		return nil, err
+	}
+
+	array.Elements = elems
+	return array, nil
+}
+
+func (p *Parser) parseExpressionList(end token.TokenType) ([]ast.Expression, error) {
+
+	list := []ast.Expression{}
+
+	if p.peekMatches(end) {
+		p.next()
+		return list, nil
+	}
+
+	p.next()
+
+	expr, err := p.parseExpression(LOWEST)
+
+	if err != nil {
+		return nil, err
+	}
+
+	list = append(list, expr)
+
+	for p.peekMatches(token.COMMA) {
+		p.next()
+		p.next()
+		expr, err := p.parseExpression(LOWEST)
+
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, expr)
+
+	}
+
+	if !p.consumeIfPeekMatches(end) {
+		return nil, fmt.Errorf("expected '%d' at end of expression list", end) // TODO: lookup token
+	}
+
+	return list, nil
+}

@@ -17,6 +17,7 @@ const (
 	PRODUCT     //*
 	PREFIX      //-Xor!X
 	CALL        // myFunction(X)
+	INDEX       // array[index]
 )
 
 type (
@@ -25,15 +26,16 @@ type (
 )
 
 var precedences = map[token.TokenType]ExpPrecedence{
-	token.EQL:    EQUALS,
-	token.NEQ:    EQUALS,
-	token.LSS:    LESSGREATER,
-	token.GTR:    LESSGREATER,
-	token.ADD:    SUM,
-	token.SUB:    SUM,
-	token.QUO:    PRODUCT,
-	token.MUL:    PRODUCT,
-	token.LPAREN: CALL,
+	token.EQL:      EQUALS,
+	token.NEQ:      EQUALS,
+	token.LSS:      LESSGREATER,
+	token.GTR:      LESSGREATER,
+	token.ADD:      SUM,
+	token.SUB:      SUM,
+	token.QUO:      PRODUCT,
+	token.MUL:      PRODUCT,
+	token.LPAREN:   CALL,
+	token.LBRACKET: INDEX,
 }
 
 type Parser struct {
@@ -63,6 +65,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.ADD, p.parseInfixExpression)
@@ -74,6 +77,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LSS, p.parseInfixExpression)
 	p.registerInfix(token.GTR, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	return p
 }

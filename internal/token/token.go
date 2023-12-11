@@ -41,6 +41,8 @@ const (
 	RPAREN    // )
 	LBRACE    // {
 	RBRACE    // }
+	LBRACKET  // [
+	RBRACKET  // ]
 
 	// Keywords
 	FUNCTION
@@ -91,6 +93,8 @@ var symbols = map[rune]TokenType{
 	')': RPAREN,
 	'{': LBRACE,
 	'}': RBRACE,
+	'[': LBRACKET,
+	']': RBRACKET,
 }
 
 func LookupIdent(ident string) TokenType {

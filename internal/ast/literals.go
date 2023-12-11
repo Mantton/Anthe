@@ -18,6 +18,11 @@ type FunctionLiteral struct {
 	Body       *BlockStatement
 }
 
+type ArrayLiteral struct {
+	Token    token.Token
+	Elements []Expression
+}
+
 // conform
 func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return "IntLit " + il.Token.Literal }
@@ -27,3 +32,6 @@ func (b *BooleanLiteral) TokenLiteral() string { return "BoolLit " + b.Token.Lit
 
 func (b *FunctionLiteral) expressionNode()      {}
 func (b *FunctionLiteral) TokenLiteral() string { return "FuncLit " + b.Token.Literal }
+
+func (b *ArrayLiteral) expressionNode()      {}
+func (b *ArrayLiteral) TokenLiteral() string { return "ArrLit " + b.Token.Literal }

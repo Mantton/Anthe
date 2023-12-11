@@ -152,46 +152,32 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) {
 
 func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, error) {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
-	v, err := p.parseCallArguments()
-	exp.Arguments = v
 
+	args, err := p.parseExpressionList(token.RPAREN)
 	if err != nil {
 		return nil, err
 	}
+
+	exp.Arguments = args
+
 	return exp, nil
 }
 
-func (p *Parser) parseCallArguments() ([]ast.Expression, error) {
-	args := []ast.Expression{}
+func (p *Parser) parseIndexExpression(left ast.Expression) (ast.Expression, error) {
+	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
 
-	if p.peekMatches(token.RPAREN) {
-		p.next()
-		return args, nil
-	}
+	p.next() // move away from '['
+	idx, err := p.parseExpression(LOWEST)
 
-	p.next()
-
-	expr, err := p.parseExpression(LOWEST)
 	if err != nil {
 		return nil, err
 	}
 
-	args = append(args, expr)
+	exp.Index = idx
 
-	for p.peekMatches(token.COMMA) {
-		p.next()
-		p.next()
-
-		expr, err := p.parseExpression(LOWEST)
-		if err != nil {
-			return nil, err
-		}
-		args = append(args, expr)
+	if !p.consumeIfPeekMatches(token.RBRACKET) {
+		return nil, fmt.Errorf("expected ']' after index got %s", p.peekToken.Literal)
 	}
 
-	if !p.consumeIfPeekMatches(token.RPAREN) {
-		return nil, fmt.Errorf("expected ')' after argument list")
-	}
-
-	return args, nil
+	return exp, nil
 }

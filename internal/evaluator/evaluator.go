@@ -17,6 +17,7 @@ var (
 
 func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 
+	fmt.Printf("\n%T", node)
 	switch node := node.(type) {
 	// Literals
 
@@ -24,6 +25,14 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 		return &object.Integer{Value: node.Value}, nil
 	case *ast.BooleanLiteral:
 		return nativeBoolToBooleanObject(node.Value), nil
+	case *ast.ArrayLiteral:
+		elems, err := evalExpressions(node.Elements, env)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return &object.Array{Elements: elems}, nil
 
 	// Program
 	case *ast.Program:
@@ -39,6 +48,20 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 		return evalBlockStatement(node, env)
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+
+	case *ast.IndexExpression:
+		left, err := Eval(node.Left, env)
+		if err != nil {
+			return nil, err
+		}
+
+		index, err := Eval(node.Index, env)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return evalIndexExpression(left, index)
 	case *ast.PrefixExpression:
 
 		rhs, err := Eval(node.Right, env)
@@ -261,4 +284,44 @@ func isTruthy(obj object.Object) bool {
 
 func evalIdentifier(node *ast.IdentifierExpression, e *object.Environment) (object.Object, error) {
 	return e.Get(node.Value)
+}
+
+func evalExpressions(
+	exps []ast.Expression,
+	env *object.Environment,
+) ([]object.Object, error) {
+	var result []object.Object
+
+	for _, e := range exps {
+		evaluated, err := Eval(e, env)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, evaluated)
+	}
+
+	return result, nil
+}
+
+func evalIndexExpression(left, index object.Object) (object.Object, error) {
+	switch {
+	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
+		return evalArrayIndexExpression(left, index)
+
+	default:
+		return nil, fmt.Errorf("index operator not supported: %s", left.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index object.Object) (object.Object, error) {
+	arrayObject := array.(*object.Array)
+	idx := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Elements) - 1)
+
+	if idx < 0 || idx > max {
+		return nil, fmt.Errorf("index out of range")
+	}
+
+	return arrayObject.Elements[idx], nil
 }
