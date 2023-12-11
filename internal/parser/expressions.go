@@ -142,3 +142,49 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) {
 	return expr, nil
 
 }
+
+func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, error) {
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	v, err := p.parseCallArguments()
+	exp.Arguments = v
+
+	if err != nil {
+		return nil, err
+	}
+	return exp, nil
+}
+
+func (p *Parser) parseCallArguments() ([]ast.Expression, error) {
+	args := []ast.Expression{}
+
+	if p.peekMatches(token.RPAREN) {
+		p.next()
+		return args, nil
+	}
+
+	p.next()
+
+	expr, err := p.parseExpression(LOWEST)
+	if err != nil {
+		return nil, err
+	}
+
+	args = append(args, expr)
+
+	for p.peekMatches(token.COMMA) {
+		p.next()
+		p.next()
+
+		expr, err := p.parseExpression(LOWEST)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, expr)
+	}
+
+	if !p.consumeIfPeekMatches(token.RPAREN) {
+		return nil, fmt.Errorf("expected ')' after argument list")
+	}
+
+	return args, nil
+}

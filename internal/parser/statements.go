@@ -41,7 +41,14 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 		return nil, errors.New("variables must be assigned immediately")
 	}
 
-	// TODO: Expressions till we match semi colon
+	v, err := p.parseExpression(LOWEST)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stmt.Value = v
+
 	for !p.currentMatches(token.SEMICOLON) {
 		p.next()
 	}
@@ -56,7 +63,13 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 	// Move to next token
 	p.next()
 
-	// TODO: expressions
+	v, err := p.parseExpression(LOWEST)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stmt.ReturnValue = v
 	for !p.currentMatches(token.SEMICOLON) {
 		p.next()
 	}

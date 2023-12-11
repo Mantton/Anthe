@@ -32,6 +32,12 @@ type IfExpression struct {
 	Alternative *BlockStatement
 }
 
+type CallExpression struct {
+	Token     token.Token
+	Function  Expression
+	Arguments []Expression
+}
+
 // conform
 func (pe *PrefixExpression) expressionNode()      {}
 func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
@@ -44,3 +50,6 @@ func (i *InfixExpression) TokenLiteral() string { return i.Token.Literal }
 
 func (i *IfExpression) expressionNode()      {}
 func (i *IfExpression) TokenLiteral() string { return i.Token.Literal }
+
+func (i *CallExpression) expressionNode()      {}
+func (i *CallExpression) TokenLiteral() string { return i.Token.Literal }

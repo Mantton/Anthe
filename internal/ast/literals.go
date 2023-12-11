@@ -12,9 +12,18 @@ type BooleanLiteral struct {
 	Value bool
 }
 
+type FunctionLiteral struct {
+	Token      token.Token
+	Parameters []*IdentifierExpression
+	Body       *BlockStatement
+}
+
 // conform
 func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 
 func (b *BooleanLiteral) expressionNode()      {}
 func (b *BooleanLiteral) TokenLiteral() string { return b.Token.Literal }
+
+func (b *FunctionLiteral) expressionNode()      {}
+func (b *FunctionLiteral) TokenLiteral() string { return b.Token.Literal }
