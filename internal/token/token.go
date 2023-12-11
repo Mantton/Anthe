@@ -18,6 +18,9 @@ const (
 	FLOAT
 	STRING // ab
 
+	NULL
+	VOID
+
 	// operator
 	ASSIGN // =
 	NOT    // !
@@ -71,6 +74,9 @@ var keywords = map[string]TokenType{
 
 	"true":  TRUE,
 	"false": FALSE,
+
+	"null": NULL,
+	"void": VOID,
 }
 
 var symbols = map[rune]TokenType{

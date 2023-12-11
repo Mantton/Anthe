@@ -10,8 +10,8 @@ import (
 )
 
 func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
+	fmt.Printf("%T\n", node)
 
-	fmt.Printf("\n%T", node)
 	switch node := node.(type) {
 	// Literals
 	case *ast.StringLiteral:
@@ -109,7 +109,6 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 			return nil, err
 		}
 		env.Define(node.Name.Value, val)
-		return val, nil
 
 	case *ast.ReturnStatement:
 		val, err := Eval(node.ReturnValue, env)
@@ -120,16 +119,20 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 
 		return &object.ReturnValue{Value: val}, nil
 
+	default:
+		return nil, fmt.Errorf("\nunknown node : %T", node)
+
 	}
 
-	return nil, fmt.Errorf("\nunknown node : %T", node)
+	return nil, nil
 }
 
 func evalProgram(program *ast.Program, e *object.Environment) (object.Object, error) {
 	var result object.Object
+	var err error
 
 	for _, statement := range program.Statements {
-		result, err := Eval(statement, e)
+		result, err = Eval(statement, e)
 
 		if err != nil {
 			return nil, err
@@ -149,6 +152,7 @@ func evalBlockStatement(
 	e *object.Environment,
 ) (object.Object, error) {
 	var result object.Object
+	var err error
 
 	// empty block return void
 	if len(block.Statements) == 0 {
@@ -156,17 +160,15 @@ func evalBlockStatement(
 	}
 
 	for _, statement := range block.Statements {
-		result, err := Eval(statement, e)
+		result, err = Eval(statement, e)
 
 		if err != nil {
 			return nil, err
 		}
 
-		if result != nil {
-			rt := result.Type()
-			if rt == object.RETURN_VALUE {
-				return result, nil
-			}
+		switch result := result.(type) {
+		case *object.ReturnValue:
+			return result.Value, nil
 		}
 	}
 

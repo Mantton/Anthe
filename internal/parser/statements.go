@@ -64,6 +64,13 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 	// Move to next token
 	p.next()
 
+	// TODO: return;
+	// if p.peekMatches(token.SEMICOLON) {
+	// 	// return;
+	// 	p.next() // move to semi
+	// 	p.next()
+	// }
+
 	v, err := p.parseExpression(LOWEST)
 
 	if err != nil {
