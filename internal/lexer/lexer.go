@@ -175,6 +175,9 @@ func (l *Lexer) nextSymbolToken() token.Token {
 		tok = newRuneToken(token.LBRACKET, l.ch)
 	case ']':
 		tok = newRuneToken(token.RBRACKET, l.ch)
+
+	case ':':
+		tok = newRuneToken(token.COLON, l.ch)
 	default:
 		tok = newRuneToken(token.ILLEGAL, l.ch)
 	}

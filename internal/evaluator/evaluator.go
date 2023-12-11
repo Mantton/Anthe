@@ -33,6 +33,8 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 		}
 
 		return &object.Array{Elements: elems}, nil
+	case *ast.HashLiteral:
+		return evalHashLiteral(node, env)
 
 	// Program
 	case *ast.Program:
@@ -309,6 +311,9 @@ func evalIndexExpression(left, index object.Object) (object.Object, error) {
 	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
 		return evalArrayIndexExpression(left, index)
 
+	case left.Type() == object.HASH:
+		return evalHashIndexExpression(left, index)
+
 	default:
 		return nil, fmt.Errorf("index operator not supported: %s", left.Type())
 	}
@@ -324,4 +329,51 @@ func evalArrayIndexExpression(array, index object.Object) (object.Object, error)
 	}
 
 	return arrayObject.Elements[idx], nil
+}
+
+func evalHashLiteral(
+	node *ast.HashLiteral,
+	env *object.Environment,
+) (object.Object, error) {
+	pairs := make(map[object.HashKey]object.HashPair)
+
+	for keyNode, valueNode := range node.Pairs {
+		key, err := Eval(keyNode, env)
+
+		if err != nil {
+			return nil, err
+		}
+
+		hashKey, ok := key.(object.HashableProtocol)
+		if !ok {
+			return nil, fmt.Errorf("%s does not conform to `hashable` protocol", key.Inspect())
+		}
+
+		value, err := Eval(valueNode, env)
+
+		if err != nil {
+			return nil, err
+		}
+
+		hashed := hashKey.HashKey()
+		pairs[hashed] = object.HashPair{Key: key, Value: value}
+	}
+
+	return &object.Hash{Pairs: pairs}, nil
+}
+
+func evalHashIndexExpression(hash, index object.Object) (object.Object, error) {
+	hashObject := hash.(*object.Hash)
+
+	key, ok := index.(object.HashableProtocol)
+	if !ok {
+		return nil, fmt.Errorf("%s does not conform to the `hashable` protocol", index.Type())
+	}
+
+	pair, ok := hashObject.Pairs[key.HashKey()]
+	if !ok {
+		return NULL, nil
+	}
+
+	return pair.Value, nil
 }

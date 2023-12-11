@@ -130,3 +130,42 @@ func (p *Parser) parseExpressionList(end token.TokenType) ([]ast.Expression, err
 
 	return list, nil
 }
+
+func (p *Parser) parseHashLiteral() (ast.Expression, error) {
+	hash := &ast.HashLiteral{Token: p.curToken}
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+	for !p.peekMatches(token.RBRACE) {
+		p.next()
+		key, err := p.parseExpression(LOWEST)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if !p.consumeIfPeekMatches(token.COLON) {
+			fmt.Println(token.COLON, p.peekToken.Type)
+			return nil, fmt.Errorf("expected ':' after key found %s", p.peekToken.Literal)
+		}
+
+		p.next()
+
+		value, err := p.parseExpression(LOWEST)
+
+		if err != nil {
+			return nil, err
+		}
+
+		hash.Pairs[key] = value
+
+		if !p.peekMatches(token.RBRACE) && !p.consumeIfPeekMatches(token.COMMA) {
+			return nil, fmt.Errorf("invalid object expression")
+		}
+	}
+
+	if !p.consumeIfPeekMatches(token.RBRACE) {
+		return nil, fmt.Errorf("expected '}' found %s", p.peekToken.Literal)
+	}
+
+	return hash, nil
+}

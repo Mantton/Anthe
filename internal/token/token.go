@@ -37,6 +37,7 @@ const (
 	// Delims
 	COMMA     // ,
 	SEMICOLON // ;
+	COLON     // :
 	LPAREN    // (
 	RPAREN    // )
 	LBRACE    // {
@@ -89,6 +90,8 @@ var symbols = map[rune]TokenType{
 	// delim
 	',': COMMA,
 	';': SEMICOLON,
+	':': COLON,
+
 	'(': LPAREN,
 	')': RPAREN,
 	'{': LBRACE,
