@@ -8,6 +8,7 @@ import (
 
 	"github.com/mantton/anthe/internal/evaluator"
 	"github.com/mantton/anthe/internal/lexer"
+	"github.com/mantton/anthe/internal/object"
 	"github.com/mantton/anthe/internal/parser"
 )
 
@@ -31,6 +32,7 @@ func main() {
 
 	} else {
 		fmt.Println("Anthe REPL")
+		test := object.New()
 
 		for {
 			fmt.Print("\n>>> ")
@@ -72,7 +74,7 @@ func main() {
 				return
 			}
 
-			evaluator, err := evaluator.Eval(prog)
+			evaluator, err := evaluator.Eval(prog, test)
 
 			if err != nil {
 				fmt.Println(err.Error())
