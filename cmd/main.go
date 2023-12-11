@@ -32,7 +32,7 @@ func main() {
 
 	} else {
 		fmt.Println("Anthe REPL")
-		test := object.New()
+		test := object.New(nil)
 
 		for {
 			fmt.Print("\n>>> ")
@@ -64,14 +64,15 @@ func main() {
 			prog := p.ParseProgram()
 
 			if prog == nil {
-				panic("how")
+				fmt.Println("program failed to parse")
+				continue
 			}
 
 			if len(prog.Errors) > 0 {
 				for _, err := range prog.Errors {
 					fmt.Println(err)
 				}
-				return
+				continue
 			}
 
 			evaluator, err := evaluator.Eval(prog, test)

@@ -5,14 +5,8 @@ import (
 	"fmt"
 
 	"github.com/mantton/anthe/internal/ast"
+	"github.com/mantton/anthe/internal/builtins"
 	"github.com/mantton/anthe/internal/object"
-)
-
-var (
-	NULL  = &object.Null{}
-	VOID  = &object.Void{}
-	TRUE  = &object.Boolean{Value: true}
-	FALSE = &object.Boolean{Value: false}
 )
 
 func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
@@ -35,6 +29,10 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 		return &object.Array{Elements: elems}, nil
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
+	case *ast.FunctionLiteral:
+		params := node.Parameters
+		body := node.Body
+		return &object.Function{Parameters: params, Env: env, Body: body}, nil
 
 	// Program
 	case *ast.Program:
@@ -50,6 +48,18 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 		return evalBlockStatement(node, env)
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+	case *ast.CallExpression:
+		function, err := Eval(node.Function, env)
+		if err != nil {
+			return nil, err
+		}
+
+		args, err := evalExpressions(node.Arguments, env)
+
+		if err != nil {
+			return nil, err
+		}
+		return applyFunction(function, args)
 
 	case *ast.IndexExpression:
 		left, err := Eval(node.Left, env)
@@ -137,6 +147,11 @@ func evalBlockStatement(
 ) (object.Object, error) {
 	var result object.Object
 
+	// empty block return void
+	if len(block.Statements) == 0 {
+		return builtins.VOID, nil
+	}
+
 	for _, statement := range block.Statements {
 		result, err := Eval(statement, e)
 
@@ -157,9 +172,9 @@ func evalBlockStatement(
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
-		return TRUE
+		return builtins.TRUE
 	}
-	return FALSE
+	return builtins.FALSE
 }
 
 func evalPrefixExpression(operator string, right object.Object) (object.Object, error) {
@@ -175,14 +190,14 @@ func evalPrefixExpression(operator string, right object.Object) (object.Object, 
 
 func evalBangOperatorExpression(right object.Object) object.Object {
 	switch right {
-	case TRUE:
-		return FALSE
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
+	case builtins.TRUE:
+		return builtins.FALSE
+	case builtins.FALSE:
+		return builtins.TRUE
+	case builtins.NULL:
+		return builtins.TRUE
 	default:
-		return FALSE
+		return builtins.FALSE
 	}
 }
 
@@ -199,6 +214,9 @@ func evalInfixExpression(
 	operator string,
 	left, right object.Object,
 ) (object.Object, error) {
+	if left == nil || right == nil {
+		return nil, errors.New("invalid reference to literal")
+	}
 	switch {
 	case left.Type() == object.INTEGER && right.Type() == object.INTEGER:
 		return evalIntegerInfixExpression(operator, left, right)
@@ -262,18 +280,21 @@ func evalIfExpression(
 	} else if ie.Alternative != nil {
 		return Eval(ie.Alternative, e)
 	} else {
-		return VOID, nil
+		return builtins.VOID, nil
 	}
 }
 
 func isTruthy(obj object.Object) bool {
 	switch obj {
-	case NULL:
+	case builtins.NULL:
 		return false
-	case TRUE:
+	case builtins.VOID:
+		return false
+	case builtins.TRUE:
 		return true
-	case FALSE:
+	case builtins.FALSE:
 		return false
+
 	}
 
 	switch obj := obj.(type) {
@@ -285,6 +306,9 @@ func isTruthy(obj object.Object) bool {
 }
 
 func evalIdentifier(node *ast.IdentifierExpression, e *object.Environment) (object.Object, error) {
+	if builtIn, ok := builtins.BuiltInFunctions[node.Value]; ok {
+		return builtIn, nil
+	}
 	return e.Get(node.Value)
 }
 
@@ -292,7 +316,7 @@ func evalExpressions(
 	exps []ast.Expression,
 	env *object.Environment,
 ) ([]object.Object, error) {
-	var result []object.Object
+	result := []object.Object{}
 
 	for _, e := range exps {
 		evaluated, err := Eval(e, env)
@@ -372,8 +396,48 @@ func evalHashIndexExpression(hash, index object.Object) (object.Object, error) {
 
 	pair, ok := hashObject.Pairs[key.HashKey()]
 	if !ok {
-		return NULL, nil
+		return builtins.NULL, nil
 	}
 
 	return pair.Value, nil
+}
+
+func applyFunction(fn object.Object, args []object.Object) (object.Object, error) {
+	switch fn := fn.(type) {
+
+	case *object.Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaluated, err := Eval(fn.Body, extendedEnv)
+		if err != nil {
+			return nil, err
+		}
+		return unwrapReturnValue(evaluated)
+
+	case *object.Builtin:
+		return fn.Fn(args...), nil
+
+	default:
+		return nil, fmt.Errorf("%s is not a function", fn.Type())
+	}
+}
+
+func extendFunctionEnv(
+	fn *object.Function,
+	args []object.Object,
+) *object.Environment {
+	env := object.New(fn.Env)
+
+	for paramIdx, param := range fn.Parameters {
+		env.Define(param.Value, args[paramIdx])
+	}
+
+	return env
+}
+
+func unwrapReturnValue(obj object.Object) (object.Object, error) {
+	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		return returnValue.Value, nil
+	}
+
+	return obj, nil
 }

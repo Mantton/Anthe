@@ -1,8 +1,13 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/mantton/anthe/internal/ast"
+)
 
 type ObjectType string
+type BuiltinFunction func(args ...Object) Object
 
 type Object interface {
 	Type() ObjectType
@@ -17,6 +22,8 @@ const (
 	RETURN_VALUE = "RETURN_VALUE"
 	ARRAY        = "ARRAY"
 	HASH         = "HASH"
+	FUNCTION     = "FUNCTION"
+	BUILTIN      = "BUILTIN"
 )
 
 type HashKey struct {
@@ -56,6 +63,20 @@ type Hash struct {
 	Pairs map[HashKey]HashPair
 }
 
+type Builtin struct {
+	Fn   BuiltinFunction
+	Name string
+}
+
+func (b *Builtin) Type() ObjectType { return BUILTIN }
+func (b *Builtin) Inspect() string  { return "builtin function: " + b.Name }
+
+type Function struct {
+	Parameters []*ast.IdentifierExpression
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
 func (b *Boolean) Type() ObjectType { return BOOLEAN }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 func (b *Boolean) HashKey() HashKey {
@@ -86,3 +107,6 @@ func (n *Array) Inspect() string  { return "ARRAYYYYYY" }
 
 func (n *Hash) Type() ObjectType { return HASH }
 func (n *Hash) Inspect() string  { return "HASH" }
+
+func (n *Function) Type() ObjectType { return FUNCTION }
+func (n *Function) Inspect() string  { return "FUNCTION" }

@@ -30,7 +30,7 @@ func (p *Parser) parseBooleanLiteral() (ast.Expression, error) {
 func (p *Parser) parseFunctionLiteral() (ast.Expression, error) {
 	lit := &ast.FunctionLiteral{Token: p.curToken}
 
-	if !p.peekMatches(token.LPAREN) {
+	if !p.consumeIfPeekMatches(token.LPAREN) {
 		return nil, fmt.Errorf("expected '(' found %s instead", p.peekToken.Literal)
 	}
 
@@ -41,6 +41,10 @@ func (p *Parser) parseFunctionLiteral() (ast.Expression, error) {
 	}
 
 	lit.Parameters = params
+
+	if !p.consumeIfPeekMatches(token.LBRACE) {
+		return nil, fmt.Errorf("expected function body found %s instead", p.peekToken.Literal)
+	}
 
 	body, err := p.parseBlockStatement()
 
