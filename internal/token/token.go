@@ -16,7 +16,7 @@ const (
 
 	INTEGER // 1233
 	FLOAT
-	STRING
+	STRING // ab
 
 	// operator
 	ASSIGN // =

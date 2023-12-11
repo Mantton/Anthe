@@ -101,12 +101,15 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.Token{Literal: "EOF", Type: token.EOF}
 	} else if token.IsSymbol(l.ch) {
 		tok = l.nextSymbolToken()
+
 	} else {
 		tok = l.nextNonSymbolToken()
-		if tok.Type != token.ILLEGAL {
+
+		if tok.Type != token.ILLEGAL && tok.Type != token.STRING {
 			// already shifted cursor dont shift again
 			return tok
 		}
+
 	}
 
 	l.next()
@@ -186,11 +189,15 @@ func (l *Lexer) nextSymbolToken() token.Token {
 }
 func (l *Lexer) nextNonSymbolToken() token.Token {
 	switch {
+	case l.ch == '"' || l.ch == '\'':
+		tok := token.Token{Literal: l.readString(), Type: token.STRING}
+		return tok
 	case isLetter(l.ch):
 		ident := l.readIdentifier()
 		return token.Token{Literal: ident, Type: token.LookupIdent(ident)}
 	case isDigit(l.ch):
 		return token.Token{Literal: l.readNumber(), Type: token.INTEGER}
+
 	}
 	return token.Token{Literal: string(l.ch), Type: token.ILLEGAL}
 }

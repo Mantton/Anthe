@@ -14,7 +14,8 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 	fmt.Printf("\n%T", node)
 	switch node := node.(type) {
 	// Literals
-
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}, nil
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}, nil
 	case *ast.BooleanLiteral:

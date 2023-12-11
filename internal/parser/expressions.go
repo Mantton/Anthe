@@ -15,7 +15,6 @@ func (p *Parser) parseExpression(prec ExpPrecedence) (ast.Expression, error) {
 	}
 
 	lhs, err := prefix()
-	// fmt.Printf("\n%T", lhs)
 
 	if err != nil {
 		return nil, err
@@ -153,7 +152,7 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) {
 func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, error) {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 
-	args, err := p.parseExpressionList(token.RPAREN)
+	args, err := p.parseExpressionList(token.RPAREN, ')')
 	if err != nil {
 		return nil, err
 	}

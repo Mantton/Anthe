@@ -1,7 +1,5 @@
 package lexer
 
-import "fmt"
-
 // checks if the given character is a letter
 func isLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
@@ -37,6 +35,17 @@ func (l *Lexer) readNumber() string {
 	return string(l.input[position:l.position])
 }
 
-func (l *Lexer) debug() {
-	fmt.Printf("\nCurrently at : %s", string(l.ch))
+func (l *Lexer) readString() string {
+	position := l.position + 1
+
+	for {
+		l.next()
+
+		if l.ch == '"' || l.ch == '\'' || l.ch == eof {
+			break
+		}
+	}
+
+	return string(l.input[position:l.position])
+
 }

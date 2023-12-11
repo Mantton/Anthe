@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+	"hash/fnv"
 
 	"github.com/mantton/anthe/internal/ast"
 )
@@ -24,6 +25,7 @@ const (
 	HASH         = "HASH"
 	FUNCTION     = "FUNCTION"
 	BUILTIN      = "BUILTIN"
+	STRING       = "STRING"
 )
 
 type HashKey struct {
@@ -48,6 +50,10 @@ type Boolean struct {
 	Value bool
 }
 
+type String struct {
+	Value string
+}
+
 type Null struct{}
 type Void struct{}
 
@@ -68,14 +74,14 @@ type Builtin struct {
 	Name string
 }
 
-func (b *Builtin) Type() ObjectType { return BUILTIN }
-func (b *Builtin) Inspect() string  { return "builtin function: " + b.Name }
-
 type Function struct {
 	Parameters []*ast.IdentifierExpression
 	Body       *ast.BlockStatement
 	Env        *Environment
 }
+
+func (b *Builtin) Type() ObjectType { return BUILTIN }
+func (b *Builtin) Inspect() string  { return "builtin function: " + b.Name }
 
 func (b *Boolean) Type() ObjectType { return BOOLEAN }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
@@ -110,3 +116,12 @@ func (n *Hash) Inspect() string  { return "HASH" }
 
 func (n *Function) Type() ObjectType { return FUNCTION }
 func (n *Function) Inspect() string  { return "FUNCTION" }
+
+func (b *String) Type() ObjectType { return STRING }
+func (b *String) Inspect() string  { return b.Value }
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}

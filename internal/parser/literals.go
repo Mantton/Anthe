@@ -87,7 +87,7 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 func (p *Parser) parseArrayLiteral() (ast.Expression, error) {
 	array := &ast.ArrayLiteral{Token: p.curToken}
 
-	elems, err := p.parseExpressionList(token.RBRACKET)
+	elems, err := p.parseExpressionList(token.RBRACKET, ']')
 
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (p *Parser) parseArrayLiteral() (ast.Expression, error) {
 	return array, nil
 }
 
-func (p *Parser) parseExpressionList(end token.TokenType) ([]ast.Expression, error) {
+func (p *Parser) parseExpressionList(end token.TokenType, c rune) ([]ast.Expression, error) {
 
 	list := []ast.Expression{}
 
@@ -129,7 +129,7 @@ func (p *Parser) parseExpressionList(end token.TokenType) ([]ast.Expression, err
 	}
 
 	if !p.consumeIfPeekMatches(end) {
-		return nil, fmt.Errorf("expected '%d' at end of expression list", end) // TODO: lookup token
+		return nil, fmt.Errorf("expected '%c' at end of expression list got %s", c, p.peekToken.Literal) // TODO: lookup token
 	}
 
 	return list, nil
@@ -148,7 +148,6 @@ func (p *Parser) parseHashLiteral() (ast.Expression, error) {
 		}
 
 		if !p.consumeIfPeekMatches(token.COLON) {
-			fmt.Println(token.COLON, p.peekToken.Type)
 			return nil, fmt.Errorf("expected ':' after key found %s", p.peekToken.Literal)
 		}
 
@@ -172,4 +171,8 @@ func (p *Parser) parseHashLiteral() (ast.Expression, error) {
 	}
 
 	return hash, nil
+}
+
+func (p *Parser) parseStringLiteral() (ast.Expression, error) {
+	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}, nil
 }

@@ -28,6 +28,11 @@ type HashLiteral struct {
 	Pairs map[Expression]Expression
 }
 
+type StringLiteral struct {
+	Token token.Token
+	Value string
+}
+
 // conform
 func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return "IntLit " + il.Token.Literal }
@@ -43,3 +48,6 @@ func (b *ArrayLiteral) TokenLiteral() string { return "ArrLit " + b.Token.Litera
 
 func (b *HashLiteral) expressionNode()      {}
 func (b *HashLiteral) TokenLiteral() string { return "HashLit " + b.Token.Literal }
+
+func (b *StringLiteral) expressionNode()      {}
+func (b *StringLiteral) TokenLiteral() string { return "StringLit " + b.Token.Literal }
