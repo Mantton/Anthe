@@ -12,7 +12,7 @@ func (p *Parser) peekMatches(t token.TokenType) bool {
 	return p.peekToken.Type == t
 }
 
-// consumes a token if the peek matches a specified token, returns true if the peek matches
+// consumes a token if the peek matches a specified token, returns true if the peek matches setting the current token to it
 func (p *Parser) consumeIfPeekMatches(t token.TokenType) bool {
 	if p.peekMatches(t) {
 		p.next()
@@ -20,4 +20,20 @@ func (p *Parser) consumeIfPeekMatches(t token.TokenType) bool {
 	} else {
 		return false
 	}
+}
+
+func (p *Parser) peekPrecedence() ExpPrecedence {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
+}
+
+func (p *Parser) currentPrecedence() ExpPrecedence {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+	return LOWEST
+
 }

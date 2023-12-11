@@ -1,19 +1,52 @@
 package parser
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/mantton/anthe/internal/ast"
 	"github.com/mantton/anthe/internal/lexer"
 	"github.com/mantton/anthe/internal/token"
 )
+
+type ExpPrecedence = byte
+
+const (
+	_       ExpPrecedence = iota
+	POSTFIX               // TODO: research
+	LOWEST
+	EQUALS      // ==
+	LESSGREATER // > or <
+	SUM         //+
+	PRODUCT     //*
+	PREFIX      //-Xor!X
+	CALL        // myFunction(X)
+)
+
+type (
+	prefixParseFn  func() (ast.Expression, error)               // --5
+	postFixParseFn func() (ast.Expression, error)               // 5++
+	infixParseFn   func(ast.Expression) (ast.Expression, error) // 5 * 5
+)
+
+var precedences = map[token.TokenType]ExpPrecedence{
+	token.EQL:    EQUALS,
+	token.NEQ:    EQUALS,
+	token.LSS:    LESSGREATER,
+	token.GTR:    LESSGREATER,
+	token.ADD:    SUM,
+	token.SUB:    SUM,
+	token.QUO:    PRODUCT,
+	token.MUL:    PRODUCT,
+	token.LPAREN: CALL,
+}
 
 type Parser struct {
 	l *lexer.Lexer
 
 	curToken  token.Token // the current token
 	peekToken token.Token // the next token after the current token
+
+	prefixParseFns  map[token.TokenType]prefixParseFn
+	postfixParseFns map[token.TokenType]postFixParseFn
+	infixParseFns   map[token.TokenType]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -22,6 +55,26 @@ func New(l *lexer.Lexer) *Parser {
 	// read two tokens, setting both current and peekToken
 	p.next() // sets peek
 	p.next() // sets current
+
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENTIFIER, p.parseIdentifier)
+	p.registerPrefix(token.INTEGER, p.parseIntegerLiteral)
+	p.registerPrefix(token.NOT, p.parsePrefixExpression)
+	p.registerPrefix(token.SUB, p.parsePrefixExpression)
+	p.registerPrefix(token.TRUE, p.parseBooleanLiteral)
+	p.registerPrefix(token.FALSE, p.parseBooleanLiteral)
+	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
+	p.registerPrefix(token.IF, p.parseIfExpression)
+
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.ADD, p.parseInfixExpression)
+	p.registerInfix(token.SUB, p.parseInfixExpression)
+	p.registerInfix(token.QUO, p.parseInfixExpression)
+	p.registerInfix(token.MUL, p.parseInfixExpression)
+	p.registerInfix(token.EQL, p.parseInfixExpression)
+	p.registerInfix(token.NEQ, p.parseInfixExpression)
+	p.registerInfix(token.LSS, p.parseInfixExpression)
+	p.registerInfix(token.GTR, p.parseInfixExpression)
 
 	return p
 }
@@ -42,70 +95,25 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 		if err != nil {
 			program.Errors = append(program.Errors, err.Error())
+			continue
 		}
 
 		// if statement is valid, append
-		if stmt != nil {
-			program.Statements = append(program.Statements, stmt)
-		}
+		program.Statements = append(program.Statements, stmt)
 
 		p.next()
 	}
 	return program
 }
 
-func (p *Parser) parseStatement() (ast.Statement, error) {
-	switch p.curToken.Type {
-	case token.LET:
-		return p.parseLetStatement()
-	case token.RETURN:
-		return p.parseReturnStatement()
-
-	default:
-		return nil, errors.New("unknown statement declaration")
-	}
+func (p *Parser) registerPrefix(tok token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tok] = fn
 }
 
-/*
-Parse let statements
-called when the parser's current token is a token.LET
-let statements take the following form
-
-`identifier` `token.ASSIGN` `expression | literal | identifier`
-*/
-func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
-	stmt := &ast.LetStatement{Token: p.curToken}
-	// if the next token is not an identifier, it is not a valid statement
-	if !p.consumeIfPeekMatches(token.IDENTIFIER) {
-		return nil, fmt.Errorf("syntax error: expected an `identifier` got %s instead", p.peekToken.Literal)
-	}
-
-	// consumed, so now the current token matches the peek which we checked was an identifier
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-	// the next statement must be an assignment token to be a valid token, return nil if not
-	if !p.consumeIfPeekMatches(token.ASSIGN) {
-		return nil, errors.New("variables must be assigned immediately")
-	}
-
-	// TODO: Expressions till we match semi colon
-	for !p.currentMatches(token.SEMICOLON) {
-		p.next()
-	}
-
-	return stmt, nil
-
+func (p *Parser) registerPostfix(tok token.TokenType, fn postFixParseFn) {
+	p.postfixParseFns[tok] = fn
 }
 
-func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
-	stmt := &ast.ReturnStatement{Token: p.curToken}
-
-	// Move to next token
-	p.next()
-
-	// TODO: expressions
-	for !p.currentMatches(token.SEMICOLON) {
-		p.next()
-	}
-	return stmt, nil
+func (p *Parser) registerInfix(tok token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tok] = fn
 }
