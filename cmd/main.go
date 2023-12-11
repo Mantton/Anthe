@@ -6,8 +6,9 @@ import (
 	"io"
 	"os"
 
+	"github.com/mantton/anthe/internal/evaluator"
 	"github.com/mantton/anthe/internal/lexer"
-	"github.com/mantton/anthe/internal/token"
+	"github.com/mantton/anthe/internal/parser"
 )
 
 const PROMPT = ">> "
@@ -56,14 +57,31 @@ func main() {
 			}
 
 			l := lexer.New(line, "repl.an")
+			p := parser.New(l)
 
-			for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-				fmt.Printf("%+v\n", tok)
+			prog := p.ParseProgram()
+
+			if prog == nil {
+				panic("how")
 			}
+
+			if len(prog.Errors) > 0 {
+				for _, err := range prog.Errors {
+					fmt.Println(err)
+				}
+				return
+			}
+
+			evaluator, err := evaluator.Eval(prog)
+
 			if err != nil {
-				fmt.Printf("\nErrors:\n%s", err.Error())
+				fmt.Println(err.Error())
+
 			}
 
+			if evaluator != nil {
+				fmt.Println("\nOUTPUT: " + evaluator.Inspect())
+			}
 		}
 	}
 

@@ -40,16 +40,16 @@ type CallExpression struct {
 
 // conform
 func (pe *PrefixExpression) expressionNode()      {}
-func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe *PrefixExpression) TokenLiteral() string { return "Prefix " + pe.Token.Literal }
 
 func (i *IdentifierExpression) expressionNode()      {}
-func (i *IdentifierExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *IdentifierExpression) TokenLiteral() string { return "Ident " + i.Token.Literal }
 
 func (i *InfixExpression) expressionNode()      {}
-func (i *InfixExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *InfixExpression) TokenLiteral() string { return "Infix " + i.Token.Literal }
 
 func (i *IfExpression) expressionNode()      {}
-func (i *IfExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *IfExpression) TokenLiteral() string { return "If " + i.Token.Literal }
 
 func (i *CallExpression) expressionNode()      {}
-func (i *CallExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *CallExpression) TokenLiteral() string { return "Call " + i.Token.Literal }

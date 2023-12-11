@@ -20,10 +20,10 @@ type FunctionLiteral struct {
 
 // conform
 func (il *IntegerLiteral) expressionNode()      {}
-func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) TokenLiteral() string { return "IntLit " + il.Token.Literal }
 
 func (b *BooleanLiteral) expressionNode()      {}
-func (b *BooleanLiteral) TokenLiteral() string { return b.Token.Literal }
+func (b *BooleanLiteral) TokenLiteral() string { return "BoolLit " + b.Token.Literal }
 
 func (b *FunctionLiteral) expressionNode()      {}
-func (b *FunctionLiteral) TokenLiteral() string { return b.Token.Literal }
+func (b *FunctionLiteral) TokenLiteral() string { return "FuncLit " + b.Token.Literal }

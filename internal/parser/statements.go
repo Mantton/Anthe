@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/mantton/anthe/internal/ast"
@@ -38,8 +37,10 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 
 	// the next statement must be an assignment token to be a valid token, return nil if not
 	if !p.consumeIfPeekMatches(token.ASSIGN) {
-		return nil, errors.New("variables must be assigned immediately")
+		return nil, fmt.Errorf("expected variable assignment ('=') found %s instead", p.peekToken.Literal)
 	}
+
+	p.next()
 
 	v, err := p.parseExpression(LOWEST)
 
@@ -49,7 +50,7 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 
 	stmt.Value = v
 
-	for !p.currentMatches(token.SEMICOLON) {
+	for p.peekMatches(token.SEMICOLON) {
 		p.next()
 	}
 
@@ -70,7 +71,7 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 	}
 
 	stmt.ReturnValue = v
-	for !p.currentMatches(token.SEMICOLON) {
+	for p.peekMatches(token.SEMICOLON) {
 		p.next()
 	}
 	return stmt, nil
@@ -78,6 +79,7 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 
 func (p *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
+
 	expr, err := p.parseExpression(LOWEST)
 
 	if err != nil {
@@ -85,9 +87,12 @@ func (p *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
 	}
 
 	stmt.Expression = expr
-	if p.consumeIfPeekMatches(token.SEMICOLON) {
+	// fmt.Printf("\n%T", stmt.Expression)
+
+	if p.peekMatches(token.SEMICOLON) {
 		p.next()
 	}
+
 	return stmt, nil
 }
 

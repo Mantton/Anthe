@@ -15,6 +15,7 @@ func (p *Parser) parseExpression(prec ExpPrecedence) (ast.Expression, error) {
 	}
 
 	lhs, err := prefix()
+	// fmt.Printf("\n%T", lhs)
 
 	if err != nil {
 		return nil, err
@@ -77,7 +78,7 @@ func (p *Parser) parseInfixExpression(lhs ast.Expression) (ast.Expression, error
 		return nil, err
 	}
 	expr.Right = rhs
-	return rhs, nil
+	return expr, nil
 }
 
 func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
@@ -99,10 +100,10 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) {
 	expr := &ast.IfExpression{Token: p.curToken}
 
 	hasLParen := p.consumeIfPeekMatches(token.LPAREN)
-	// on expression at this point
+	// on either if token or bracket token, move once more to expression
+	p.next()
 
 	condition, err := p.parseExpression(LOWEST)
-
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +114,11 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) {
 		if !p.consumeIfPeekMatches(token.RPAREN) {
 			return nil, fmt.Errorf("expected ')', got %s", p.peekToken.Literal)
 		}
+	}
+
+	// now either at '{' or at last expression
+	if !p.consumeIfPeekMatches(token.LBRACE) {
+		return nil, fmt.Errorf("expected '{', got %s", p.peekToken.Literal)
 	}
 
 	action, err := p.parseBlockStatement()
@@ -139,6 +145,7 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) {
 
 		expr.Alternative = alt
 	}
+
 	return expr, nil
 
 }

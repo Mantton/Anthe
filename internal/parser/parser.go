@@ -9,8 +9,7 @@ import (
 type ExpPrecedence = byte
 
 const (
-	_       ExpPrecedence = iota
-	POSTFIX               // TODO: research
+	_ ExpPrecedence = iota
 	LOWEST
 	EQUALS      // ==
 	LESSGREATER // > or <
@@ -21,9 +20,8 @@ const (
 )
 
 type (
-	prefixParseFn  func() (ast.Expression, error)               // --5
-	postFixParseFn func() (ast.Expression, error)               // 5++
-	infixParseFn   func(ast.Expression) (ast.Expression, error) // 5 * 5
+	prefixParseFn func() (ast.Expression, error)               // --5
+	infixParseFn  func(ast.Expression) (ast.Expression, error) // 5 * 5
 )
 
 var precedences = map[token.TokenType]ExpPrecedence{
@@ -44,9 +42,8 @@ type Parser struct {
 	curToken  token.Token // the current token
 	peekToken token.Token // the next token after the current token
 
-	prefixParseFns  map[token.TokenType]prefixParseFn
-	postfixParseFns map[token.TokenType]postFixParseFn
-	infixParseFns   map[token.TokenType]infixParseFn
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -92,15 +89,17 @@ func (p *Parser) ParseProgram() *ast.Program {
 	program.Errors = []string{}
 
 	for p.curToken.Type != token.EOF {
+
 		// while not at eof token, parse statement
 		stmt, err := p.parseStatement()
 
 		if err != nil {
 			program.Errors = append(program.Errors, err.Error())
-			continue
+			break
 		}
 
 		// if statement is valid, append
+
 		program.Statements = append(program.Statements, stmt)
 
 		p.next()
@@ -110,10 +109,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) registerPrefix(tok token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tok] = fn
-}
-
-func (p *Parser) registerPostfix(tok token.TokenType, fn postFixParseFn) {
-	p.postfixParseFns[tok] = fn
 }
 
 func (p *Parser) registerInfix(tok token.TokenType, fn infixParseFn) {

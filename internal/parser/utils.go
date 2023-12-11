@@ -23,16 +23,16 @@ func (p *Parser) consumeIfPeekMatches(t token.TokenType) bool {
 }
 
 func (p *Parser) peekPrecedence() ExpPrecedence {
-	if p, ok := precedences[p.peekToken.Type]; ok {
-		return p
+	if prec, ok := precedences[p.peekToken.Type]; ok {
+		return prec
 	}
 
 	return LOWEST
 }
 
 func (p *Parser) currentPrecedence() ExpPrecedence {
-	if p, ok := precedences[p.curToken.Type]; ok {
-		return p
+	if prec, ok := precedences[p.curToken.Type]; ok {
+		return prec
 	}
 	return LOWEST
 
