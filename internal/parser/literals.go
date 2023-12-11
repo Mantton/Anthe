@@ -23,6 +23,21 @@ func (p *Parser) parseIntegerLiteral() (ast.Expression, error) {
 
 }
 
+func (p *Parser) parseFloatingPointLiteral() (ast.Expression, error) {
+	lit := &ast.FloatLiteral{Token: p.curToken}
+
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+
+	if err != nil {
+		return nil, err
+	}
+
+	lit.Value = value
+
+	return lit, nil
+
+}
+
 func (p *Parser) parseBooleanLiteral() (ast.Expression, error) {
 	return &ast.BooleanLiteral{Token: p.curToken, Value: p.currentMatches(token.TRUE)}, nil
 }

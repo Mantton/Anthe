@@ -7,6 +7,11 @@ type IntegerLiteral struct {
 	Value int64
 }
 
+type FloatLiteral struct {
+	Token token.Token
+	Value float64
+}
+
 type BooleanLiteral struct {
 	Token token.Token
 	Value bool
@@ -51,3 +56,6 @@ func (b *HashLiteral) TokenLiteral() string { return "HashLit " + b.Token.Litera
 
 func (b *StringLiteral) expressionNode()      {}
 func (b *StringLiteral) TokenLiteral() string { return "StringLit " + b.Token.Literal }
+
+func (b *FloatLiteral) expressionNode()      {}
+func (b *FloatLiteral) TokenLiteral() string { return "Float Lit " + b.Token.Literal }

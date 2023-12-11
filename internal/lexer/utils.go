@@ -27,12 +27,21 @@ func (l *Lexer) skipWhitespace() {
 }
 
 // moves cursor to last digit character, returns the resulting substring
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() (string, bool) {
 	position := l.position
 	for isDigit(l.ch) {
 		l.next()
 	}
-	return string(l.input[position:l.position])
+	isFloat := false
+	if l.ch == '.' {
+		isFloat = true
+		l.next()
+
+		for isDigit(l.ch) {
+			l.next()
+		}
+	}
+	return string(l.input[position:l.position]), isFloat
 }
 
 func (l *Lexer) readString() string {

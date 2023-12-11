@@ -196,7 +196,14 @@ func (l *Lexer) nextNonSymbolToken() token.Token {
 		ident := l.readIdentifier()
 		return token.Token{Literal: ident, Type: token.LookupIdent(ident)}
 	case isDigit(l.ch):
-		return token.Token{Literal: l.readNumber(), Type: token.INTEGER}
+
+		val, isFloat := l.readNumber()
+
+		if isFloat {
+			return token.Token{Literal: val, Type: token.FLOAT}
+		} else {
+			return token.Token{Literal: val, Type: token.INTEGER}
+		}
 
 	}
 	return token.Token{Literal: string(l.ch), Type: token.ILLEGAL}

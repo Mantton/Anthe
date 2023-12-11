@@ -16,16 +16,17 @@ type Object interface {
 }
 
 const (
-	INTEGER      = "INTEGER"
-	BOOLEAN      = "BOOLEAN"
-	NULL         = "NULL"
-	VOID         = "VOID"
-	RETURN_VALUE = "RETURN_VALUE"
-	ARRAY        = "ARRAY"
-	HASH         = "HASH"
-	FUNCTION     = "FUNCTION"
-	BUILTIN      = "BUILTIN"
-	STRING       = "STRING"
+	INTEGER      = "integer"
+	BOOLEAN      = "boolean"
+	NULL         = "null"
+	VOID         = "void"
+	RETURN_VALUE = "return_value"
+	ARRAY        = "array"
+	HASH         = "hashmap"
+	FUNCTION     = "function"
+	BUILTIN      = "builtin_function"
+	STRING       = "string"
+	FLOAT        = "float"
 )
 
 type HashKey struct {
@@ -44,6 +45,10 @@ type HashableProtocol interface {
 
 type Integer struct {
 	Value int64
+}
+
+type Float struct {
+	Value float64
 }
 
 type Boolean struct {
@@ -124,4 +129,10 @@ func (s *String) HashKey() HashKey {
 	h.Write([]byte(s.Value))
 
 	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
+
+func (i *Float) Type() ObjectType { return FLOAT }
+func (i *Float) Inspect() string  { return fmt.Sprintf("%.1f", i.Value) }
+func (i *Float) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
 }

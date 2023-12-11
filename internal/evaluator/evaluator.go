@@ -18,6 +18,8 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 		return &object.String{Value: node.Value}, nil
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}, nil
+	case *ast.FloatLiteral:
+		return &object.Float{Value: node.Value}, nil
 	case *ast.BooleanLiteral:
 		return nativeBoolToBooleanObject(node.Value), nil
 	case *ast.ArrayLiteral:
@@ -120,7 +122,7 @@ func Eval(node ast.Node, env *object.Environment) (object.Object, error) {
 
 	}
 
-	return nil, fmt.Errorf("unknown node : %T", node)
+	return nil, fmt.Errorf("\nunknown node : %T", node)
 }
 
 func evalProgram(program *ast.Program, e *object.Environment) (object.Object, error) {
