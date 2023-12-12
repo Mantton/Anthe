@@ -1,6 +1,8 @@
 package ast
 
-import "github.com/mantton/anthe/internal/token"
+import (
+	"github.com/mantton/anthe/internal/token"
+)
 
 type IntegerLiteral struct {
 	Token token.Token

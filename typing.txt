@@ -1,0 +1,76 @@
+
+https://www.typescriptlang.org/docs/handbook/2/everyday-types.html
+let x: int = 20;
+let y : float = 20;
+let z : string = ""
+let x : bool  = false
+
+let arr : <identifier>[] = []
+let x : any = wut ever
+
+literal type int, float , string , bool
+
+array_type_types <type>[] | array<type>
+
+result: result<V> conforms to unwrappable
+
+any_type
+
+set: set<type> where `type` conforms to `hashable`
+
+
+map : map<K, V> where K conforms to `hashable`
+object: map<string, V>, JS Object Like
+
+
+optional : <V>? | optional<V>
+
+// structs
+
+package main
+struct MyStruct {
+    const value: int = 10
+    let age : int = 10 // default
+
+    func init(_ value: int, age: int) {
+        this.value = age
+        this.age = age
+    }
+
+}
+
+const s = MyStruct(), MyStruct.init(), MyStruct{}
+OR 
+const s: MyStruct = {}, .init()
+
+extension MyStruct {
+    mut func test() {
+        age += 1;
+    }
+}
+
+extension MyStruct: truthy {
+     func IsTruthy() : bool {
+        return age.IsTruthy() // int conforms to truthy protocol
+    }
+
+    static operator == (lhs: Self, rhs: Self) : bool {
+        
+    }
+}
+
+
+// Protocols
+
+reference_passed -> object is passed by ref
+
+unwrappable<V> :  {
+    unwrap() throws -> V
+}
+
+resolveable <R, F> : {
+    result : func (R) {},
+    failure: func (F) {}
+}
+
+iterable<V>, indexable<integer>, hashable, comparable, truthy<bool>

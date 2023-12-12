@@ -1,6 +1,8 @@
 package ast
 
-import "github.com/mantton/anthe/internal/token"
+import (
+	"github.com/mantton/anthe/internal/token"
+)
 
 type Statement interface {
 	Node
@@ -12,6 +14,7 @@ type LetStatement struct {
 	Token token.Token // The token.LET token
 	Name  *IdentifierExpression
 	Value Expression
+	Type  TypeExpression
 }
 
 // RETURN

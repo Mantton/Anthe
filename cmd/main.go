@@ -10,6 +10,7 @@ import (
 	"github.com/mantton/anthe/internal/lexer"
 	"github.com/mantton/anthe/internal/object"
 	"github.com/mantton/anthe/internal/parser"
+	"github.com/mantton/anthe/internal/typing"
 )
 
 const PROMPT = ">> "
@@ -73,6 +74,17 @@ func main() {
 					fmt.Println(err)
 				}
 				continue
+			}
+
+			checker := typing.New(prog.Statements)
+
+			ok, t_err := checker.CheckAll()
+
+			if !ok {
+				fmt.Println("Type Checker : Errors")
+				for _, msg := range t_err {
+					fmt.Println(msg)
+				}
 			}
 
 			evaluator, err := evaluator.Eval(prog, test)

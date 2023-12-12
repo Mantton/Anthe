@@ -181,6 +181,8 @@ func (l *Lexer) nextSymbolToken() token.Token {
 
 	case ':':
 		tok = newRuneToken(token.COLON, l.ch)
+	case '?':
+		tok = newRuneToken(token.Q_MARK, l.ch)
 	default:
 		tok = newRuneToken(token.ILLEGAL, l.ch)
 	}
