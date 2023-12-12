@@ -8,10 +8,11 @@ import (
 
 type TypeChecker struct {
 	Statements []ast.Statement
+	scope      map[string]ast.TypeExpression
 }
 
 func New(s []ast.Statement) *TypeChecker {
-	return &TypeChecker{Statements: s}
+	return &TypeChecker{Statements: s, scope: make(map[string]ast.TypeExpression)}
 }
 
 func (t *TypeChecker) CheckAll() (bool, []string) {
@@ -33,16 +34,7 @@ func (t *TypeChecker) check(statement ast.Statement) error {
 
 	switch statement := statement.(type) {
 	case *ast.LetStatement:
-		declType := statement.Type
-		initType, err := t.visitExpression(statement.Value)
-		if err != nil {
-			return err
-		}
-		ok := t.matchTypes(declType, initType)
-		if !ok {
-			return fmt.Errorf("cannot assign `%s` to variable declared as a `%s`", initType.Type(), declType.Type())
-		}
-		fmt.Printf("\n%T", declType)
+		return t.checkLetStatement(statement)
 	}
 
 	return nil
@@ -66,7 +58,7 @@ func (t *TypeChecker) visitExpression(expression ast.Expression) (ast.TypeExpres
 	}
 }
 
-func (t *TypeChecker) matchTypes(t1, t2 ast.TypeExpression) bool {
-	return t1.Type() == t2.Type()
+func (t *TypeChecker) matchTypes(lhs, rhs ast.TypeExpression) bool {
+	return lhs.Type() == rhs.Type()
 
 }
