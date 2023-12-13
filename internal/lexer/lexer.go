@@ -193,6 +193,10 @@ func (l *Lexer) nextNonSymbolToken() token.Token {
 	switch {
 	case l.ch == '"' || l.ch == '\'':
 		tok := token.Token{Literal: l.readString(), Type: token.STRING}
+
+		if l.ch == eof {
+			panic("TODO: invalid string declaration")
+		}
 		return tok
 	case isLetter(l.ch):
 		ident := l.readIdentifier()

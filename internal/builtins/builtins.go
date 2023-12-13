@@ -25,8 +25,8 @@ var BuiltInFunctions = map[string]*object.Builtin{
 		},
 	},
 
-	"type": {
-		Name: "type",
+	"typeOf": {
+		Name: "typeOf",
 		Fn: func(args ...object.Object) object.Object {
 			if len(args) == 0 {
 				return VOID

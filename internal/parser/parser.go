@@ -11,6 +11,7 @@ type ExpPrecedence = byte
 const (
 	_ ExpPrecedence = iota
 	LOWEST
+	ASSIGN      // x = y
 	EQUALS      // ==
 	LESSGREATER // > or <
 	SUM         //+
@@ -26,6 +27,7 @@ type (
 )
 
 var precedences = map[token.TokenType]ExpPrecedence{
+	token.ASSIGN:   ASSIGN,
 	token.EQL:      EQUALS,
 	token.NEQ:      EQUALS,
 	token.LSS:      LESSGREATER,
@@ -74,6 +76,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
+	p.registerPrefix(token.NULL, p.parseNullLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.ADD, p.parseInfixExpression)
@@ -86,6 +89,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GTR, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
+	p.registerInfix(token.ASSIGN, p.parseAssignmentExpression)
 
 	return p
 }

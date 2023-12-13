@@ -68,10 +68,10 @@ func (p *Parser) parseInfixExpression(lhs ast.Expression) (ast.Expression, error
 		Left:     lhs,
 	}
 
-	presc := p.currentPrecedence()
+	precedence := p.currentPrecedence()
 	p.next()
 
-	rhs, err := p.parseExpression(presc)
+	rhs, err := p.parseExpression(precedence)
 
 	if err != nil {
 		return nil, err
@@ -179,4 +179,27 @@ func (p *Parser) parseIndexExpression(left ast.Expression) (ast.Expression, erro
 	}
 
 	return exp, nil
+}
+
+func (p *Parser) parseAssignmentExpression(left ast.Expression) (ast.Expression, error) {
+
+	switch left := left.(type) {
+	case *ast.IdentifierExpression:
+		expr := &ast.AssignmentExpression{Token: p.curToken, Target: left}
+
+		p.next() // move to token after `=`
+
+		rhs, err := p.parseExpression(LOWEST)
+
+		if err != nil {
+			return nil, err
+		}
+
+		expr.Value = rhs
+
+		return expr, err
+	default:
+		return nil, fmt.Errorf("invalid assignment call")
+	}
+
 }

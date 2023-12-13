@@ -8,9 +8,7 @@ import (
 
 	"github.com/mantton/anthe/internal/evaluator"
 	"github.com/mantton/anthe/internal/lexer"
-	"github.com/mantton/anthe/internal/object"
 	"github.com/mantton/anthe/internal/parser"
-	"github.com/mantton/anthe/internal/typing"
 )
 
 const PROMPT = ">> "
@@ -20,20 +18,39 @@ func main() {
 	allArgs := os.Args[1:]
 	argCount := len(allArgs)
 
+	e := evaluator.New()
+
 	if argCount > 1 { // not enough args provided
 		fmt.Println("Usage: anthe [script]")
 		os.Exit(64)
 	} else if argCount == 1 {
 
-		// filePath := allArgs[0]
+		path := allArgs[0]
 
-		// if err != nil {
-		// 	fmt.Printf("\nErrors:\n%s", err.Error())
-		// }
+		data, err := os.ReadFile(path)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		l := lexer.New(string(data), "repl.an")
+		p := parser.New(l)
+
+		prog := p.ParseProgram()
+
+		result, err := e.RunProgram(prog)
+
+		if err != nil {
+			fmt.Println(err.Error())
+
+		}
+
+		if result != nil && result.Type() != "void" {
+			fmt.Println("\nOUTPUT: " + result.Inspect())
+		}
 
 	} else {
 		fmt.Println("Anthe REPL")
-		test := object.New(nil)
 
 		for {
 			fmt.Print("\n>>> ")
@@ -76,26 +93,26 @@ func main() {
 				continue
 			}
 
-			checker := typing.New(prog.Statements)
+			// checker := typing.New(prog.Statements)
 
-			ok, t_err := checker.CheckAll()
+			// ok, t_err := checker.CheckAll()
 
-			if !ok {
-				fmt.Println("Type Checker : Errors")
-				for _, msg := range t_err {
-					fmt.Println(msg)
-				}
-			}
+			// if !ok {
+			// 	fmt.Println("Type Checker : Errors")
+			// 	for _, msg := range t_err {
+			// 		fmt.Println(msg)
+			// 	}
+			// }
 
-			evaluator, err := evaluator.Eval(prog, test)
+			result, err := e.RunProgram(prog)
 
 			if err != nil {
 				fmt.Println(err.Error())
 
 			}
 
-			if evaluator != nil {
-				fmt.Println("\nOUTPUT: " + evaluator.Inspect())
+			if result != nil && result.Type() != "void" {
+				fmt.Println("\nOUTPUT: " + result.Inspect())
 			}
 		}
 	}

@@ -191,3 +191,7 @@ func (p *Parser) parseHashLiteral() (ast.Expression, error) {
 func (p *Parser) parseStringLiteral() (ast.Expression, error) {
 	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}, nil
 }
+
+func (p *Parser) parseNullLiteral() (ast.Expression, error) {
+	return &ast.NullLiteral{Token: p.curToken}, nil
+}

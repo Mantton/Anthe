@@ -82,7 +82,6 @@ type Builtin struct {
 type Function struct {
 	Parameters []*ast.IdentifierExpression
 	Body       *ast.BlockStatement
-	Env        *Environment
 }
 
 func (b *Builtin) Type() ObjectType { return BUILTIN }

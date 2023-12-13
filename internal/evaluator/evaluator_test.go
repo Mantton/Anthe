@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/mantton/anthe/internal/lexer"
-	"github.com/mantton/anthe/internal/object"
 	"github.com/mantton/anthe/internal/parser"
 )
 
@@ -26,7 +25,7 @@ func TestEvaluator(t *testing.T) {
 		}
 	}
 
-	_, err := Eval(prog, object.New(nil))
+	_, err := New().RunProgram(prog)
 
 	if err != nil {
 		t.Fatal(err)

@@ -54,6 +54,10 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 
 	p.next()
 
+	if p.curToken.Type == token.VOID {
+		return nil, fmt.Errorf("variable cannot be assigned to void, use null instead") // TODO: move to type checker
+	}
+
 	v, err := p.parseExpression(LOWEST)
 
 	if err != nil {
