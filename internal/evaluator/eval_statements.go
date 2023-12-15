@@ -12,14 +12,12 @@ import (
 func (e *Evaluator) evaluateStatement(node ast.Statement, scope *scope.Scope) (object.Object, error) {
 	switch node := node.(type) {
 
-	// Expressions
 	case *ast.ExpressionStatement:
 		return e.eval(node.Expression, scope)
 
 	case *ast.BlockStatement:
 		return e.evalBlockStatement(node, scope)
 
-		// Statements
 	case *ast.LetStatement:
 
 		val, err := e.eval(node.Value, scope)
@@ -29,6 +27,19 @@ func (e *Evaluator) evaluateStatement(node ast.Statement, scope *scope.Scope) (o
 		}
 
 		err = scope.DefineVariable(node.Name.Value, val)
+
+		if err != nil {
+			return nil, err
+		}
+	case *ast.ConstStatement:
+
+		val, err := e.eval(node.Value, scope)
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = scope.DefineConstant(node.Name.Value, val)
 
 		if err != nil {
 			return nil, err

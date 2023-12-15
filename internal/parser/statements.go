@@ -13,6 +13,8 @@ func (p *Parser) parseStatement() (ast.Statement, error) {
 		return p.parseFunctionDeclaration()
 	case token.LET:
 		return p.parseLetStatement()
+	case token.CONST:
+		return p.parseConstStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
@@ -56,9 +58,51 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 
 	p.next()
 
-	if p.curToken.Type == token.VOID {
-		return nil, fmt.Errorf("variable cannot be assigned to void, use null instead") // TODO: move to type checker
+	v, err := p.parseExpression(LOWEST)
+
+	if err != nil {
+		return nil, err
 	}
+
+	stmt.Value = v
+
+	for p.peekMatches(token.SEMICOLON) {
+		p.next()
+	}
+
+	return stmt, nil
+
+}
+
+// TODO: this could just be merged with the let statement with a constant flag
+func (p *Parser) parseConstStatement() (*ast.ConstStatement, error) {
+	stmt := &ast.ConstStatement{Token: p.curToken}
+	// if the next token is not an identifier, it is not a valid statement
+	if !p.consumeIfPeekMatches(token.IDENTIFIER) {
+		return nil, fmt.Errorf("syntax error: expected an `identifier` got %s instead", p.peekToken.Literal)
+	}
+
+	// consumed, so now the current token matches the peek which we checked was an identifier
+	stmt.Name = &ast.IdentifierExpression{Token: p.curToken, Value: p.curToken.Literal}
+
+	if p.consumeIfPeekMatches(token.COLON) {
+		// strong typing variable
+		p.next() // move to type decl, parse type
+
+		t, err := p.parseTypeDeclaration()
+
+		if err != nil {
+			return nil, err
+		}
+		stmt.Type = t
+	}
+
+	// the next statement must be an assignment token to be a valid token, return nil if not
+	if !p.consumeIfPeekMatches(token.ASSIGN) {
+		return nil, fmt.Errorf("expected variable assignment ('=') found %s instead", p.peekToken.Literal)
+	}
+
+	p.next()
 
 	v, err := p.parseExpression(LOWEST)
 
