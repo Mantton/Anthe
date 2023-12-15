@@ -17,7 +17,6 @@ func (e *Evaluator) evaluateExpression(node ast.Expression, scope *scope.Scope) 
 	case *ast.IfExpression:
 		return e.evalIfExpression(node, scope)
 	case *ast.CallExpression:
-		fmt.Println(node.Token.Literal)
 		function, err := e.eval(node.Function, scope)
 		if err != nil {
 			return nil, err

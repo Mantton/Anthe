@@ -42,6 +42,14 @@ func (e *Evaluator) evaluateStatement(node ast.Statement, scope *scope.Scope) (o
 		}
 
 		return &object.ReturnValue{Value: val}, nil
+	case *ast.NamedFunctionDeclaration:
+		val, err := e.evalNamedFunctionDeclaration(node, scope)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return val, nil
 
 	default:
 		return nil, fmt.Errorf("\nunknown node : %T", node)
@@ -122,4 +130,18 @@ func unwrapReturnValue(obj object.Object) (object.Object, error) {
 	}
 
 	return obj, nil
+}
+
+// named function
+func (e *Evaluator) evalNamedFunctionDeclaration(fn *ast.NamedFunctionDeclaration, s *scope.Scope) (object.Object, error) {
+
+	obj := &object.Function{Name: fn.Name, Parameters: fn.Fn.Parameters, Body: fn.Fn.Body}
+
+	err := s.Inject(obj.Name, obj)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return builtins.VOID, nil
 }

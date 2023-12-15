@@ -29,8 +29,8 @@ func (s *Scope) InjectList(values map[string]object.Object) error {
 	return nil
 }
 func (s *Scope) Inject(name string, value object.Object) error {
-	s.store[name] = value
 
+	s.store[name] = value
 	return nil
 }
 

@@ -80,8 +80,17 @@ type Builtin struct {
 }
 
 type Function struct {
+	Name       string
 	Parameters []*ast.IdentifierExpression
 	Body       *ast.BlockStatement
+}
+
+type Structure struct {
+	// Parent     *Structure
+	Name    string
+	Members map[string]Object
+	// Methods    map[string]Function
+	// Protocols  map[string]string
 }
 
 func (b *Builtin) Type() ObjectType { return BUILTIN }

@@ -34,6 +34,12 @@ type BlockStatement struct {
 	Statements []Statement
 }
 
+type NamedFunctionDeclaration struct {
+	token.Token
+	Name string
+	Fn   *FunctionLiteral
+}
+
 // conform
 func (s *LetStatement) statementNode()       {}
 func (s *LetStatement) TokenLiteral() string { return "Let " + s.Token.Literal }
@@ -48,3 +54,6 @@ func (s *ExpressionStatement) TokenLiteral() string {
 
 func (s *BlockStatement) statementNode()       {}
 func (s *BlockStatement) TokenLiteral() string { return s.Token.Literal }
+
+func (s *NamedFunctionDeclaration) statementNode()       {}
+func (s *NamedFunctionDeclaration) TokenLiteral() string { return s.Token.Literal + s.Name }

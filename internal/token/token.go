@@ -81,6 +81,8 @@ const (
 	ANY_OBJ_T // any object
 	ANY_T     // any non null value
 
+	STRUCT // struct declaration
+
 )
 
 var keywords = map[string]TokenType{
@@ -98,6 +100,8 @@ var keywords = map[string]TokenType{
 
 	"null": NULL,
 	"void": VOID,
+
+	"struct": STRUCT,
 }
 
 var symbols = map[rune]TokenType{

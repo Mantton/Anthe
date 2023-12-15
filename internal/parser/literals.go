@@ -68,6 +68,12 @@ func (p *Parser) parseFunctionLiteral() (ast.Expression, error) {
 	}
 
 	lit.Body = body
+
+	if !p.currentMatches(token.RBRACE) {
+		return nil, fmt.Errorf("expected '}' found %s instead", p.peekToken.Literal)
+	}
+
+	p.next()
 	return lit, nil
 }
 
