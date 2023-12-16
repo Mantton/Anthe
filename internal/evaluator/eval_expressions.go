@@ -232,6 +232,10 @@ func (e *Evaluator) evalIntegerInfixExpression(
 		return e.nativeBoolToBooleanObject(leftVal < rightVal), nil
 	case ">":
 		return e.nativeBoolToBooleanObject(leftVal > rightVal), nil
+	case ">=":
+		return e.nativeBoolToBooleanObject(leftVal >= rightVal), nil
+	case "<=":
+		return e.nativeBoolToBooleanObject(leftVal <= rightVal), nil
 	case "==":
 		return e.nativeBoolToBooleanObject(leftVal == rightVal), nil
 	case "!=":

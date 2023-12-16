@@ -37,6 +37,9 @@ const (
 	EQL // ==
 	NEQ // !=
 
+	LEQ // <=
+	GEQ // >=
+
 	// Delims
 	COMMA     // ,
 	SEMICOLON // ;

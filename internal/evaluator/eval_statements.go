@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/mantton/anthe/internal/ast"
@@ -89,10 +90,17 @@ func (e *Evaluator) evalBlockStatement(
 			return nil, err
 		}
 
-		switch result := result.(type) {
-		case *object.ReturnValue:
-			return result.Value, nil
+		if result == nil {
+			continue
 		}
+
+		if result.Type() == object.RETURN_VALUE {
+			return result, nil
+		}
+	}
+
+	if result == nil {
+		return nil, errors.New("unexpected nil result")
 	}
 
 	return result, nil

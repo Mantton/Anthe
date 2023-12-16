@@ -1,4 +1,4 @@
-run:
+rudn:
 	@go run ./cmd/main.go
 
 

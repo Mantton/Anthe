@@ -39,7 +39,7 @@ func (e *Evaluator) RunProgram(program *ast.Program) (object.Object, error) {
 }
 
 func (e *Evaluator) eval(node ast.Node, scope *scope.Scope) (object.Object, error) {
-	fmt.Printf("\n%T", node)
+	// fmt.Printf("\n%T", node)
 	switch node := node.(type) {
 	case ast.LiteralExpression:
 		return e.evaluateLiteral(node, scope)

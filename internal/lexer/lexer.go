@@ -157,9 +157,18 @@ func (l *Lexer) nextSymbolToken() token.Token {
 
 	// boolean
 	case '>':
-		tok = newRuneToken(token.GTR, l.ch)
+
+		if l.matchAndConsume('=') {
+			tok = newStringToken(token.GEQ, ">=")
+		} else {
+			tok = newRuneToken(token.GTR, l.ch)
+		}
 	case '<':
-		tok = newRuneToken(token.LSS, l.ch)
+		if l.matchAndConsume('=') {
+			tok = newStringToken(token.LEQ, "<=")
+		} else {
+			tok = newRuneToken(token.LSS, l.ch)
+		}
 
 	// delim
 	case ';':
