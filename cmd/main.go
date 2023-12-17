@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/mantton/anthe/internal/compiler"
 	"github.com/mantton/anthe/internal/evaluator"
 	"github.com/mantton/anthe/internal/lexer"
 	"github.com/mantton/anthe/internal/parser"
@@ -38,16 +39,17 @@ func main() {
 
 		prog := p.ParseProgram()
 
-		result, err := e.RunProgram(prog)
-
+		c := compiler.New()
+		result, err := c.Compile(prog)
 		if err != nil {
 			fmt.Println(err.Error())
+			return
 
 		}
 
-		if result != nil && result.Type() != "void" {
-			fmt.Println("\nOUTPUT: " + result.Inspect())
-		}
+		fmt.Println("\n\n\n")
+		fmt.Println(result)
+		fmt.Println("done")
 
 	} else {
 		fmt.Println("Anthe REPL")
