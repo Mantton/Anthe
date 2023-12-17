@@ -5,11 +5,13 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/mantton/anthe/internal/ast"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type Compiler struct {
-	module  *ir.Module
-	symbols *SymbolTable
+	module       *ir.Module
+	symbols      *SymbolTable
+	currentBlock *ir.Block
 }
 
 // Create new compiler struct
@@ -31,4 +33,14 @@ func (c *Compiler) Compile(program *ast.Program) (string, error) {
 	result := c.module.String()
 
 	return result, nil
+}
+
+func (c *Compiler) genId() string {
+	id, err := gonanoid.Generate("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 12)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return id
 }

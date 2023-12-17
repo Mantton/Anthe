@@ -6,9 +6,10 @@ import (
 )
 
 type SymbolInfo struct {
-	Name  string
-	Value value.Value
-	Type  types.Type
+	Name        string
+	Value       value.Value
+	Type        types.Type
+	IsParameter bool
 }
 
 type SymbolTable struct {
