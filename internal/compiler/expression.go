@@ -32,6 +32,7 @@ func (c *Compiler) compileInfixExpression(expr *ast.InfixExpression, table *Symb
 
 	left := c.compileExpression(expr.Left, table)
 	right := c.compileExpression(expr.Right, table)
+
 	operator := expr.Operator
 
 	if left == nil || right == nil {

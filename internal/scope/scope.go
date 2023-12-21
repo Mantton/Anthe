@@ -65,7 +65,6 @@ func (s *Scope) Assign(name string, value object.Object) error {
 	// check variable
 	_, ok := s.variables[name]
 
-	// TODO: check if value being assigned is protected etc
 	if !ok {
 
 		_, ok = s.constants[name]
